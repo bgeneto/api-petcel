@@ -1,0 +1,130 @@
+########################################
+# Remove index.php from URL
+########################################
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Hides index.php from URL
+    RewriteCond $1 !^(index\.php|assets|robots\.txt|favicon\.ico)
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteRule ^(.*)$ index.php/$1 [L,QSA]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    # If we don't have mod_rewrite installed, all 404's
+    # can be sent to index.php, and everything works as normal.
+    ErrorDocument 404 /index.php
+</IfModule>
+
+
+########################################
+# Locale settings
+########################################
+SetEnv LC_ALL  'en_US.UTF-8'
+SetEnv LANG    'en_US.UTF-8'
+DefaultLanguage en-US
+
+########################################
+# Set up UTF-8 encoding
+########################################
+AddDefaultCharset UTF-8
+AddCharset UTF-8 .php
+AddCharset UTF-8 .htm
+AddCharset UTF-8 .html
+
+########################################
+# Security settings
+########################################
+Options -Indexes
+
+########################################
+# Compression settings
+########################################
+<IfModule mod_deflate.c>
+    # Force compression for mangled headers.
+    # http://developer.yahoo.com/blogs/ydn/posts/2010/12/pushing-beyond-gzipping
+    <IfModule mod_setenvif.c>
+        <IfModule mod_headers.c>
+            SetEnvIfNoCase ^(Accept-EncodXng|X-cept-Encoding|X{15}|~{15}|-{15})$ ^((gzip|deflate)\s*,?\s*)+|[X~-]{4,13}$ HAVE_Accept-Encoding
+            RequestHeader append Accept-Encoding "gzip,deflate" env=HAVE_Accept-Encoding
+        </IfModule>
+    </IfModule>
+    # Compress all output labeled with one of the following MIME-types
+    # (for Apache versions below 2.3.7, you don't need to enable `mod_filter`
+    #  and can remove the `<IfModule mod_filter.c>` and `</IfModule>` lines
+    #  as `AddOutputFilterByType` is still in the core directives).
+    <IfModule mod_filter.c>
+        AddOutputFilterByType DEFLATE application/atom+xml \
+        application/javascript \
+        application/json \
+        application/rss+xml \
+        application/vnd.ms-fontobject \
+        application/x-font-ttf \
+        application/x-web-app-manifest+json \
+        application/xhtml+xml \
+        application/xml \
+        font/opentype \
+        image/svg+xml \
+        image/x-icon \
+        text/css \
+        text/html \
+        text/plain \
+        text/x-component \
+        text/xml
+    </IfModule>
+</IfModule>
+
+########################################
+# Cache settings
+########################################
+#Força a utilizar Cache-Control e Expires header
+<IfModule mod_headers.c>
+    Header unset ETag
+</IfModule>
+FileETag None
+<IfModule mod_expires.c>
+    ExpiresActive on
+    ExpiresDefault "access plus 1 month"
+    ExpiresByType text/cache-manifest "access plus 0 seconds"
+    # Html
+    ExpiresByType text/html "access plus 0 seconds"
+    # Data
+    ExpiresByType text/xml "access plus 0 seconds"
+    ExpiresByType application/xml "access plus 0 seconds"
+    ExpiresByType application/json "access plus 0 seconds"
+    # Feed
+    ExpiresByType application/rss+xml "access plus 1 hour"
+    ExpiresByType application/atom+xml "access plus 1 hour"
+    # Favicon
+    ExpiresByType image/x-icon "access plus 1 week"
+    # Media: images, video, audio
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType video/ogg "access plus 1 month"
+    ExpiresByType audio/ogg "access plus 1 month"
+    ExpiresByType video/mp4 "access plus 1 month"
+    ExpiresByType video/webm "access plus 1 month"
+    # HTC files
+    ExpiresByType text/x-component "access plus 1 month"
+    # Webfonts
+    ExpiresByType application/x-font-ttf "access plus 1 month"
+    ExpiresByType font/opentype "access plus 1 month"
+    ExpiresByType application/x-font-woff "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType application/vnd.ms-fontobject "access plus 1 month"
+    # CSS / JS
+    ExpiresByType text/css "access plus 1 year"
+    ExpiresByType application/javascript "access plus 1 year"
+    ExpiresByType application/x-javascript  "access plus 1 year"
+</IfModule>
+
+#Força o IE a sempre carregar utilizando a última versão disponível
+<IfModule mod_headers.c>
+    Header set X-UA-Compatible "IE=Edge,chrome=1"
+    <FilesMatch "\.(js|css|gif|png|jpeg|pdf|xml|oga|ogg|m4a|ogv|mp4|m4v|webm|svg|svgz|eot|ttf|otf|woff|ico|webp|appcache|manifest|htc|crx|oex|xpi|safariextz|vcf)$" >
+        Header unset X-UA-Compatible
+    </FilesMatch>
+</IfModule>
